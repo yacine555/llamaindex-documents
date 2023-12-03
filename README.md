@@ -62,7 +62,9 @@ Start the application by running:
 pipenv run python main.py
 ```
 or
-
+```bash
+pipenv run python agent.py
+```
 
 
 Run the the app streamlit
@@ -102,6 +104,9 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Resources
 - [Llamaindex RAGconcept](https://docs.llamaindex.ai/en/stable/getting_started/concepts.html)
+
+
+- Agents: [ReAct(Reasoning and Acting) agent paper](https://arxiv.org/abs/2210.03629)
 
 ## Acknowledgments
 
