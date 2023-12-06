@@ -104,6 +104,9 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 
 - Agents: [ReAct(Reasoning and Acting) agent paper](https://arxiv.org/abs/2210.03629)
+- [langchainhub](https://smith.langchain.com/hub)
+
+https://medium.com/@bSharpML/use-llamaindex-and-a-local-llm-to-summarize-youtube-videos-29817440e671
 
 ## Acknowledgments
 
