@@ -30,6 +30,7 @@ def write_haiku(topic: str) -> str:
     Write a haiku about a given topic.
     """
     haiku = llm.complete(f"Writing a haiku about {topic}")
+    print(haiku)
     return haiku
 
 
@@ -75,7 +76,7 @@ def open_url(url:str)->str:
 if __name__ == "__main__":
     print("**** Hello Agents with Llamaindex ****")
     # llm = MYLLM.get_llm_model()
-    llm = MYLLM.get_llm_model("HUGGINGFACE", "default", 0.7)
+    llm = MYLLM.get_llm_model("LOCAL_LAMA2CPP", "default", 0.7)
 
     tool1 = FunctionTool.from_defaults(fn=write_haiku, name="Write Haiku")
     tool2 = FunctionTool.from_defaults(fn=count_characters, name="Count Characters")
@@ -91,4 +92,9 @@ if __name__ == "__main__":
 
 
     print(res)
+
+
+    response = llm.complete("Hello! Can you tell me a poem about cats and dogs?")
+    print(response.text)
+
     pass

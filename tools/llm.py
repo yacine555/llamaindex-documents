@@ -57,10 +57,8 @@ class MYLLM:
                 llm = OpenAI(model_name=llm_model_name, temperature=temperature)
             case "LOCAL_LAMA2CPP":
                 llm = LlamaCPP(
-                        model_url="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/resolve/main/llama-2-13b-chat.Q5_K_M.gguf",
-
-                        # optionally, you can set the path to a pre-downloaded model instead of model_url
-                        model_path=None,
+                        model_url=None,
+                        model_path="/Users/ybouakkaz/Documents/Projects/Evoke/Tech/Tuorials/Huggingface/GitHub/llamaindex-documents/tools/models/llama-2-7b-chat.Q5_K_M.gguf",
 
                         temperature=temperature,
                         max_new_tokens=1024,
@@ -73,7 +71,7 @@ class MYLLM:
 
                         # kwargs to pass to __init__()
                         # set to at least 1 to use GPU
-                        model_kwargs={"n_gpu_layers": 1},
+                        model_kwargs={"n_gpu_layers": 0},
 
                         # transform inputs into Llama2 format
                         messages_to_prompt=messages_to_prompt,

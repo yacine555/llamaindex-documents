@@ -37,7 +37,7 @@ Clone the repository and install the required packages:
 
 ```bash
 git clone https://github.com/yacine555/llamindex-documents
-cd llamindex-helloworld
+cd llamindex-documents
 pipenv install -r requirements.txt 
 ```
 
