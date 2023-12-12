@@ -68,7 +68,7 @@ pipenv run python agent.py
 
 Run the the app streamlit
 ```bash
-pipenv run streamlit run main.py
+pipenv run streamlit run myApp.py
 ```
 
 ## Deployment

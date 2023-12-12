@@ -32,6 +32,11 @@ callback_manager = None
 if debug_mode:
     callback_manager = CallbackManager(handlers=[llama_debug])
 
+
+st.markdown("# APP DEMO")
+st.sidebar.markdown("# Main")
+
+
 def clear_cache():
     st.legacy_caching.caching.clear_cache()
     st.session_state.clear()
