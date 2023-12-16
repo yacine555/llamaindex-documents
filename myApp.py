@@ -8,19 +8,21 @@ from llama_index import (
 )
 from llama_index.vector_stores import PineconeVectorStore
 from llama_index.vector_stores import MilvusVectorStore
-from llama_index.callbacks import LlamaDebugHandler,CallbackManager
+from llama_index.callbacks import LlamaDebugHandler, CallbackManager
 from llama_index.postprocessor import (
     SimilarityPostprocessor,
-    SentenceEmbeddingOptimizer
+    SentenceEmbeddingOptimizer,
 )
 from llama_index import SimpleDirectoryReader
 import streamlit as st
 import openai
-from node_postprocessors.duplicate_postprocessing import DuplicateRemoverNodePostprocessor
+from node_postprocessors.duplicate_postprocessing import (
+    DuplicateRemoverNodePostprocessor,
+)
 
 load_dotenv()
-openapi_key = os.getenv('OPENAI_API_KEY')
-index_name = os.getenv('PINECONE_INDEX_NAME')
+openapi_key = os.getenv("OPENAI_API_KEY")
+index_name = os.getenv("PINECONE_INDEX_NAME")
 print(index_name)
 
 EMBEDDING_SIZE = "1536"
@@ -42,13 +44,14 @@ def clear_cache():
     st.session_state.clear()
 
 
-def scrapURL(url:str)-> VectorStoreIndex:
-    documents= SimpleWebPageReader(html_to_text=True).load_data(urls=[url])
-    #print(documents)
+def scrapURL(url: str) -> VectorStoreIndex:
+    documents = SimpleWebPageReader(html_to_text=True).load_data(urls=[url])
+    # print(documents)
     index = VectorStoreIndex.from_documents(documents=documents)
     return index
 
-def queryVSIndex(index:VectorStoreIndex, query:str):
+
+def queryVSIndex(index: VectorStoreIndex, query: str):
     query_engine = index.as_query_engine()
     response = query_engine.query(query)
     print(response)
@@ -59,26 +62,33 @@ def queryVSIndex(index:VectorStoreIndex, query:str):
         # Print info on llm inputs/outputs - returns start/end events for each LLM call
         event_pairs = llama_debug.get_llm_inputs_outputs()
         print("\nWhat was sent to LLM:\n")
-        print(event_pairs[0][0]) # Shows what was sent to LLM
+        print(event_pairs[0][0])  # Shows what was sent to LLM
         print("\nPayload keys:\n")
-        print(event_pairs[0][1].payload.keys()) # What other things you can debug by simply passing the key
+        print(
+            event_pairs[0][1].payload.keys()
+        )  # What other things you can debug by simply passing the key
         print("\nLLM Response\n")
-        print(event_pairs[0][1].payload["response"]) # Shows the LLM response it generated.
+        print(
+            event_pairs[0][1].payload["response"]
+        )  # Shows the LLM response it generated.
 
 
-#@st.cache_resource(show_spinner=False)
-def get_vsindex(indexname:str, service_context:ServiceContext)-> VectorStoreIndex:
-  
+# @st.cache_resource(show_spinner=False)
+def get_vsindex(indexname: str, service_context: ServiceContext) -> VectorStoreIndex:
     index_name = indexname
-    pinecone.init(api_key=os.environ["PINECONE_API_KEY"], environment=os.environ["PINECONE_ENVIRONMENT"])
+    pinecone.init(
+        api_key=os.environ["PINECONE_API_KEY"],
+        environment=os.environ["PINECONE_ENVIRONMENT"],
+    )
     pinecone_index = pinecone.Index(index_name=index_name)
     vectore_store = PineconeVectorStore(pinecone_index=pinecone_index)
-    vsindex = VectorStoreIndex.from_vector_store(vector_store=vectore_store, service_context=service_context)
+    vsindex = VectorStoreIndex.from_vector_store(
+        vector_store=vectore_store, service_context=service_context
+    )
 
     return vsindex
 
 
-       
 @st.cache_resource(show_spinner=False)
 def load_data():
     # with st.spinner(text="Loading and indexing the Streamlit docs – hang tight! This should take 1-2 minutes."):
@@ -88,12 +98,13 @@ def load_data():
     #     index = VectorStoreIndex.from_documents(docs, service_context=service_context)
     #     return index
     pass
-    
+
+
 vsindex = load_data()
 
 
 # st.set_page_config(
-#     page_title="Chat with LlamaIndex Docs", 
+#     page_title="Chat with LlamaIndex Docs",
 #     page_icon=":robot:",
 #     layout = "centered",
 #     initial_sidebar_state="auto",
@@ -103,41 +114,37 @@ st.title("Chat with LlamaIndex Docs 💬 📚")
 st.info("Check out the full tutorial", icon="📃")
 
 
-
-print('Hello World LlamaIndex Demo')
+print("Hello World LlamaIndex Demo")
 
 st.cache_resource.clear()
 st.cache_data.clear()
 
 
-#index = scrapURL(url='https://cbarkinozer.medium.com/an-overview-of-the-llamaindex-framework-9ee9db787d16')
-#queryVSIndex(index,"What is the purpose of the LLamaIndex framework?")
+# index = scrapURL(url='https://cbarkinozer.medium.com/an-overview-of-the-llamaindex-framework-9ee9db787d16')
+# queryVSIndex(index,"What is the purpose of the LLamaIndex framework?")
 
-llamai_service_context = ServiceContext.from_defaults(
-    callback_manager=callback_manager
-)
+llamai_service_context = ServiceContext.from_defaults(callback_manager=callback_manager)
 
 vsindex = get_vsindex(index_name, service_context=llamai_service_context)
 
 
-#query="What is a Llamaindex query engine?"
-#query="What is a llamaindex agent?"
-#queryVSIndex(vsindex,query)
+# query="What is a Llamaindex query engine?"
+# query="What is a llamaindex agent?"
+# queryVSIndex(vsindex,query)
 
 if "chat_engine" not in st.session_state.keys():
-
     # Note that the processing process send API queries using the openAI embeding model => cost money
     sentenceemb_postprocessor = SentenceEmbeddingOptimizer(
-                                embed_model=llamai_service_context.embed_model,
-                                percentile_cutoff=0.5,
-                                threshold_cutoff=0.7,
-                            )
+        embed_model=llamai_service_context.embed_model,
+        percentile_cutoff=0.5,
+        threshold_cutoff=0.7,
+    )
 
     similarity_postprocessor = SimilarityPostprocessor(similarity_cutoff=0.8)
     duplicaterem_postprocessor = DuplicateRemoverNodePostprocessor()
 
-    node_postprocessors=[sentenceemb_postprocessor,duplicaterem_postprocessor]
-        
+    node_postprocessors = [sentenceemb_postprocessor, duplicaterem_postprocessor]
+
     st.session_state.chat_engine = vsindex.as_chat_engine(
         chat_mode="context",
         verbose=True,
@@ -145,18 +152,13 @@ if "chat_engine" not in st.session_state.keys():
     )
 
 if prompt := st.chat_input("Your question"):
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": prompt
-        }
-    )
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [
         {
             "role": "assistant",
-            "content": "Hello, ask me a quetion about LlamaIndex's open source Library!"
+            "content": "Hello, ask me a quetion about LlamaIndex's open source Library!",
         }
     ]
 
@@ -164,9 +166,9 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-#Q for debug: What is a llamaindex agent?
+# Q for debug: What is a llamaindex agent?
 
-#If last message is not from assistant, generate a new response
+# If last message is not from assistant, generate a new response
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
@@ -175,13 +177,12 @@ if st.session_state.messages[-1]["role"] != "assistant":
             st.session_state.messages.append(message)
             st.write(response.response)
 
-            nodes = [ node for node in response.source_nodes]
+            nodes = [node for node in response.source_nodes]
 
             for col, node, i in zip(st.columns(len(nodes)), nodes, range(len(nodes))):
                 with col:
                     st.divider()
                     st.write(f"Source Node {i +1}: score= {node.score}")
                     st.write(node.metadata)
-                    st.write(node.text) 
+                    st.write(node.text)
                     st.divider()
-

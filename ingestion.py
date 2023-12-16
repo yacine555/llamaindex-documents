@@ -34,59 +34,66 @@ else:
 """
 Dowload the Natural Toolkit resources on first use if not available
 """
-#nltk.download()
+# nltk.download()
 
 load_dotenv()
 
 index_name = os.environ["PINECONE_INDEX_NAME"]
-embeddings = os.environ["EMBEDDING_CONFIG"]     # DEFAULT => OPENAI | LOCAL => Huggingface
+embeddings = os.environ["EMBEDDING_CONFIG"]  # DEFAULT => OPENAI | LOCAL => Huggingface
 
-llm =None
+llm = None
 llm_model_type = "DEFAULT"  # DEFAULT => OPENAI | LOCAL => Huggingface
 
 
-
-
-
-
-def load_data()-> VectorStoreIndex:
+def load_data() -> VectorStoreIndex:
     """
     Load structured data (md file) using OpenAI llm and default inMemory storage
     """
     reader = SimpleDirectoryReader(input_dir="./docs/streamlit-docs", recursive=True)
     docs = reader.load_data()
 
-    service_context = ServiceContext.from_defaults(llm=OpenAI(model="gpt-3.5-turbo", temperature=0.5, system_prompt="You are an expert on the Streamlit Python library and your job is to answer technical questions. Assume that all questions are related to the Streamlit Python library. Keep your answers technical and based on facts – do not hallucinate features."))
+    service_context = ServiceContext.from_defaults(
+        llm=OpenAI(
+            model="gpt-3.5-turbo",
+            temperature=0.5,
+            system_prompt="You are an expert on the Streamlit Python library and your job is to answer technical questions. Assume that all questions are related to the Streamlit Python library. Keep your answers technical and based on facts – do not hallucinate features.",
+        )
+    )
     vsindex = VectorStoreIndex.from_documents(docs, service_context=service_context)
     return vsindex
-    
+
+
 def load_unstructured_data():
     """
     Load unstructured data into Pinecon using OpenAI llm
     """
-    UnstructuredReader = download_loader('UnstructuredReader')
+    UnstructuredReader = download_loader("UnstructuredReader")
 
-    dir_reader = SimpleDirectoryReader('./docs/llamindex-docs', file_extractor={
-    ".pdf": UnstructuredReader(),
-    ".html": UnstructuredReader(),
-    ".eml": UnstructuredReader(),
-    })
+    dir_reader = SimpleDirectoryReader(
+        "./docs/llamindex-docs",
+        file_extractor={
+            ".pdf": UnstructuredReader(),
+            ".html": UnstructuredReader(),
+            ".eml": UnstructuredReader(),
+        },
+    )
     documents = dir_reader.load_data()
-    #print(documents[0].text)
+    # print(documents[0].text)
     node_parser = SimpleNodeParser.from_defaults(chunk_size=500, chunk_overlap=20)
-    #nodes = node_parser.get_nodes_from_documents(documents=documents)
+    # nodes = node_parser.get_nodes_from_documents(documents=documents)
 
     service_context = None
 
     if embeddings == "DEFAULT":
         print("Using OpenAI embeddings...")
         llm = OpenAI(model="gpt-3.5-turbo", temperature=0.0)
-        embed_model = OpenAIEmbedding(model="text-embedding-ada-002", embed_batch_size=100)
+        embed_model = OpenAIEmbedding(
+            model="text-embedding-ada-002", embed_batch_size=100
+        )
         service_context = ServiceContext.from_defaults(
-            llm=llm, embed_model=embed_model,node_parser=node_parser
+            llm=llm, embed_model=embed_model, node_parser=node_parser
         )
     else:
-
         system_prompt = """<|SYSTEM|># StableLM Tuned (Alpha version)
         - StableLM is a helpful and harmless open-source AI language model developed by StabilityAI.
         - StableLM is excited to be able to help the user, but will refuse to do anything that could be considered harmful to the user.
@@ -115,24 +122,23 @@ def load_unstructured_data():
         # Using local embeddings downloaded from Huggungface with HGF LLM
         print("Using Local embeddings...")
         service_context = ServiceContext.from_defaults(
-            llm=llm,embed_model="local:BAAI/bge-large-en",node_parser=node_parser
+            llm=llm, embed_model="local:BAAI/bge-large-en", node_parser=node_parser
         )
 
     pinecone_index = pinecone.Index(index_name=index_name)
     vectore_store = PineconeVectorStore(pinecone_index=pinecone_index)
     storage_context = StorageContext.from_defaults(vector_store=vectore_store)
-    
+
     index = VectorStoreIndex.from_documents(
-        documents=documents, 
-        service_context=service_context, 
+        documents=documents,
+        service_context=service_context,
         storage_context=storage_context,
         show_progress=True,
     )
 
     print("Finish Ingesting...")
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     # vsindex=load_data()
     load_unstructured_data()
-

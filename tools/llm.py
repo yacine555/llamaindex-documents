@@ -4,13 +4,7 @@ import logging
 import sys
 from dotenv import load_dotenv, find_dotenv
 
-from llama_index.llms import (
-    LLM,
-    OpenAI,
-    LlamaCPP,
-    HuggingFaceLLM,
-    Replicate
-    )
+from llama_index.llms import LLM, OpenAI, LlamaCPP, HuggingFaceLLM, Replicate
 from llama_index.llms.llama_utils import (
     messages_to_prompt,
     completion_to_prompt,
@@ -25,8 +19,8 @@ logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
 os.environ["REPLICATE_API_TOKEN"] = "REPLICATE_API_TOKEN"
 
-class MYLLM:
 
+class MYLLM:
     # inject custom system prompt into llama-2
 
     def custom_completion_to_prompt(completion: str) -> str:
@@ -39,15 +33,19 @@ class MYLLM:
         )
 
     @staticmethod
-    def get_llm_model(llm_model_type:str="OPENAI", llm_model_name:str="text-davinci-003", temperature:float=0.7) -> LLM:
+    def get_llm_model(
+        llm_model_type: str = "OPENAI",
+        llm_model_name: str = "text-davinci-003",
+        temperature: float = 0.7,
+    ) -> LLM:
         """
         Select the LLM model to use.
 
         :param:
             llm_model_type: OPENAI|LOCAL_LAMA2CPP|REPLICATE
-            llm_model_name: 
+            llm_model_name:
                     for OPENAI: text-davinci-003|gpt-3.5-turbo|gpt-4-1106-preview|gpt-3.5-turbo-1106
-            temperature:    
+            temperature:
         """
 
         llm = None
@@ -57,26 +55,21 @@ class MYLLM:
                 llm = OpenAI(model_name=llm_model_name, temperature=temperature)
             case "LOCAL_LAMA2CPP":
                 llm = LlamaCPP(
-                        model_url=None,
-                        model_path="/Users/ybouakkaz/Documents/Projects/Evoke/Tech/Tuorials/Huggingface/GitHub/llamaindex-documents/tools/models/llama-2-7b-chat.Q5_K_M.gguf",
-
-                        temperature=temperature,
-                        max_new_tokens=1024,
-
-                        # llama2 has a context window of 4096 tokens, but we set it lower to allow for some wiggle room
-                        context_window=2048,  # note, this sets n_ctx in the model_kwargs below, so you don't need to pass it there.
-
-                        # kwargs to pass to __call__()
-                        generate_kwargs={},
-
-                        # kwargs to pass to __init__()
-                        # set to at least 1 to use GPU
-                        model_kwargs={"n_gpu_layers": 0},
-
-                        # transform inputs into Llama2 format
-                        messages_to_prompt=messages_to_prompt,
-                        completion_to_prompt=completion_to_prompt,
-                        verbose=True,
+                    model_url=None,
+                    model_path="/Users/ybouakkaz/Documents/Projects/Evoke/Tech/Tuorials/Huggingface/GitHub/llamaindex-documents/tools/models/llama-2-7b-chat.Q5_K_M.gguf",
+                    temperature=temperature,
+                    max_new_tokens=1024,
+                    # llama2 has a context window of 4096 tokens, but we set it lower to allow for some wiggle room
+                    context_window=2048,  # note, this sets n_ctx in the model_kwargs below, so you don't need to pass it there.
+                    # kwargs to pass to __call__()
+                    generate_kwargs={},
+                    # kwargs to pass to __init__()
+                    # set to at least 1 to use GPU
+                    model_kwargs={"n_gpu_layers": 0},
+                    # transform inputs into Llama2 format
+                    messages_to_prompt=messages_to_prompt,
+                    completion_to_prompt=completion_to_prompt,
+                    verbose=True,
                 )
             case "REPLICATE":
                 # The replicate endpoint
@@ -95,8 +88,7 @@ class MYLLM:
                 )
 
             case "HUGGINGFACE":
-
-                # TODO: only configured to use the HF StableLM LLM model 
+                # TODO: only configured to use the HF StableLM LLM model
                 system_prompt = """<|SYSTEM|># StableLM Tuned (Alpha version)
                 - StableLM is a helpful and harmless open-source AI language model developed by StabilityAI.
                 - StableLM is excited to be able to help the user, but will refuse to do anything that could be considered harmful to the user.
@@ -105,7 +97,9 @@ class MYLLM:
                 """
 
                 # This will wrap the default prompts that are internal to llama-index
-                query_wrapper_prompt = PromptTemplate("<|USER|>{query_str}<|ASSISTANT|>")
+                query_wrapper_prompt = PromptTemplate(
+                    "<|USER|>{query_str}<|ASSISTANT|>"
+                )
 
                 llm = HuggingFaceLLM(
                     context_window=4096,
@@ -125,7 +119,4 @@ class MYLLM:
             case _:
                 llm = OpenAI(model_name=llm_model_name, temperature=temperature)
 
-
         return llm
-    
-
