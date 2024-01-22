@@ -11,16 +11,16 @@ Follow these instructions to run the app on your local machine for development a
 ### Prerequisites and Dependencies
 
 Before you begin, ensure you have the following installed:
-- Python 3.10.10 or later. Note that this was only tested on 3.10.10
+- Python 3.10.10 or later. Note that this was only tested on 3.11.5
 - [Pipenv](https://pipenv.pypa.io/en/latest/) 
 
 
 Here are the PIP modules used
 
-- [**python-dotenv (1.0.0)**](https://pypi.org/project/python-dotenv/1.0.0/): Reads key-value pairs from a `.env` file and sets them as environment variables.
-- [**Llama-index (0.9.10)**](https://pypi.org/project/llama-index/0.9.10/): Provides a GPT Index as a data framework for  LLM application.
-- [**streamlit (1.29.0)**](https://pypi.org/project/streamlit/1.29.0/): An app framework for Machine Learning and Data Science to create apps quickly.
-- [**NTLK (3.8.1)**](https://www.nltk.org/) [pip](https://pypi.org/project/streamlit/1.29.0/): Natural Language Toolkit is a leading platform for building Python programs to work with human language data.
+- [**python-dotenv**](https://pypi.org/project/python-dotenv/1.0.0/): Reads key-value pairs from a `.env` file and sets them as environment variables.
+- [**Llama-index**](https://pypi.org/project/llama-index/0.9.10/): Provides a GPT Index as a data framework for  LLM application.
+- [**streamlit**](https://pypi.org/project/streamlit/1.29.0/): An app framework for Machine Learning and Data Science to create apps quickly.
+- [**NTLK**](https://www.nltk.org/) [pip](https://pypi.org/project/streamlit/1.29.0/): Natural Language Toolkit is a leading platform for building Python programs to work with human language data.
 
 
 ### Installation
@@ -54,9 +54,19 @@ export PINECONE_API_KEY='your_langchain_api_key'
 Check the LLM embeding size and update the variable
 
 
+### data preprocessind
+
+Load the docs
+
+```bash
+pipenv run python docs/download_docs.py
+```
+
 ### Running the Application
 
 Start the application by running:
+
+
 
 ```bash
 pipenv run python main.py
