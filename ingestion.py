@@ -6,6 +6,7 @@ from llama_index.llms import HuggingFaceLLM
 from llama_index.prompts import PromptTemplate
 from llama_index.llms import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.readers import SimpleWebPageReader
 from llama_index import (
     SimpleDirectoryReader,
     download_loader,
@@ -44,6 +45,11 @@ embeddings = os.environ["EMBEDDING_CONFIG"]  # DEFAULT => OPENAI | LOCAL => Hugg
 llm = None
 llm_model_type = "DEFAULT"  # DEFAULT => OPENAI | LOCAL => Huggingface
 
+def scrapURL(url: str) -> VectorStoreIndex:
+    documents = SimpleWebPageReader(html_to_text=True).load_data(urls=[url])
+    print(documents)
+    index = VectorStoreIndex.from_documents(documents=documents)
+    return index
 
 def load_data() -> VectorStoreIndex:
     """
@@ -65,7 +71,7 @@ def load_data() -> VectorStoreIndex:
 
 def load_unstructured_data():
     """
-    Load unstructured data into Pinecon using OpenAI llm
+    Load unstructured data into Pinecone using OpenAI llm
     """
     UnstructuredReader = download_loader("UnstructuredReader")
 
@@ -141,4 +147,6 @@ def load_unstructured_data():
 
 if __name__ == "__main__":
     # vsindex=load_data()
-    load_unstructured_data()
+    #load_unstructured_data()
+    #scrapURL("https://mistral.ai")
+

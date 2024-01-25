@@ -54,12 +54,16 @@ export PINECONE_API_KEY='your_langchain_api_key'
 Check the LLM embeding size and update the variable
 
 
-### data preprocessind
+### data preprocessing
 
 Load the docs
 
 ```bash
 pipenv run python docs/download_docs.py
+```
+
+```bash
+pipenv run python ingestion.py
 ```
 
 ### Running the Application

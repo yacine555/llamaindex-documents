@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import pinecone
-from llama_index.readers import SimpleWebPageReader
+
 from llama_index import (
     ServiceContext,
     VectorStoreIndex,
@@ -42,13 +42,6 @@ st.sidebar.markdown("# Main")
 def clear_cache():
     st.legacy_caching.caching.clear_cache()
     st.session_state.clear()
-
-
-def scrapURL(url: str) -> VectorStoreIndex:
-    documents = SimpleWebPageReader(html_to_text=True).load_data(urls=[url])
-    # print(documents)
-    index = VectorStoreIndex.from_documents(documents=documents)
-    return index
 
 
 def queryVSIndex(index: VectorStoreIndex, query: str):
