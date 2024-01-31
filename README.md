@@ -56,21 +56,24 @@ Check the LLM embeding size and update the variable
 
 ### data preprocessing
 
-Load the docs
+Load the data
 
 ```bash
-pipenv run python docs/download_docs.py
+pipenv run python data/download_data.py
 ```
 
 ```bash
-pipenv run python ingestion.py
+pipenv run python backend/ingestion.py
+```
+
+Eval the data
+```bash
+pipenv run python backend/eval.py
 ```
 
 ### Running the Application
 
 Start the application by running:
-
-
 
 ```bash
 pipenv run python main.py

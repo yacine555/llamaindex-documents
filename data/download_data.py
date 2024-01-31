@@ -3,11 +3,14 @@ from bs4 import BeautifulSoup
 import os
 import urllib
 
+SOURCE_DIR = "./data/source/"
 
 def download_site(url:str,output_dir:str,html_filter:str=None):
-    print(f"Downlad site {url} in {output_dir}")
+
+    path_data = SOURCE_DIR + output_dir
+    print(f"Downlad site {url} in {path_data}")
     # Create the output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(path_data, exist_ok=True)
 
     # Fetch the page
     response = requests.get(url)
@@ -58,9 +61,9 @@ def download_site(url:str,output_dir:str,html_filter:str=None):
 
                 # Write it to a file
                 
-                file_name = os.path.join(output_dir, os.path.basename(page_name))
-                directory = output_dir + href.replace(url, "").replace("https://","/")
-                file_name = output_dir + page_name.replace("https://","/")
+                file_name = os.path.join(path_data, os.path.basename(page_name))
+                directory = path_data + href.replace(url, "").replace("https://","/")
+                file_name = path_data + page_name.replace("https://","/")
                 
                 if not os.path.exists(directory):
                     print(f"create directory {directory} ")
@@ -76,5 +79,5 @@ def download_site(url:str,output_dir:str,html_filter:str=None):
 
 if __name__ == "__main__":
 
-    # download_site("https://docs.llamaindex.ai/en/stable/","./docs/llamindex-docs/")
-    download_site("https://mistral.ai","./docs/mistral_ai/")
+    # download_site("https://docs.llamaindex.ai/en/stable/","./data/llamindex-docs/")
+    download_site("https://mistral.ai","mistral_ai/")
