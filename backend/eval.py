@@ -57,11 +57,13 @@ def generate_eval_questions(filepath:str):
 
     question_dataset = []
     if os.path.exists(filepath + "question_dataset.txt"):
+        print("Loading existing questions...")
         with open(filepath + "question_dataset.txt", "r") as f:
             for line in f:
                 question_dataset.append(line.strip())
     else:
         # generate questions
+        print("Generating questions for evaluation...")
         data_generator = DatasetGenerator.from_documents(
             [giant_document],
             text_question_template=Prompt(
@@ -83,7 +85,7 @@ def generate_eval_questions(filepath:str):
             service_context=gpt4_service_context
         )
         generated_questions = data_generator.generate_questions_from_nodes()
-
+        
         # randomly pick 40 questions from each dataset
         print(generated_questions)
         # generated_questions = random.sample(generated_questions, 40)
@@ -92,20 +94,19 @@ def generate_eval_questions(filepath:str):
         print(f"Generated {len(question_dataset)} questions.")
 
         # save the questions!
-        with open(filepath + "_question_dataset.txt", "w") as f:
+        with open(filepath + "question_dataset.txt", "w") as f:
             for question in question_dataset:
                 f.write(f"{question.strip()}\n")
 
     return question_dataset
 
-async def evaluate_query_engine(evaluator, query_engine, questions):
+def evaluate_query_engine(evaluator, query_engine, questions):
     async def run_query(query_engine, q):
         try:
             return await query_engine.aquery(q)
         except:
             return Response(response="Error, query failed.")
 
-    print("Start Eval:")
     total_correct = 0
     all_results = []
     for batch_size in range(0, len(questions), 5):
@@ -119,7 +120,69 @@ async def evaluate_query_engine(evaluator, query_engine, questions):
             eval_result = 1 if "YES" in evaluator.evaluate(response) else 0
             total_correct += eval_result
             all_results.append(eval_result)
-            print(f"Eval q res: {eval_result}")
+        
+        # helps avoid rate limits
+        time.sleep(1)
+
+    return total_correct, all_results
+
+
+async def run_query(query_engine, q):
+    try:
+        return await query_engine.aquery(q)
+    except:
+        return Response(response="Error, query failed.")
+
+async def run_query2(query_engine, q):
+    return await query_engine.aquery(q)
+
+async def query_batch_question(query_engine, batch_qs):
+    tasks = [run_query2(query_engine, q) for q in batch_qs]
+    L = await asyncio.gather(*tasks)
+    print(L)
+    return L
+
+
+def evaluate_query_engine(evaluator, query_engine, questions):
+
+    print(f"Start Eval on {len(questions)} questions ...")
+    total_correct = 0
+    all_results = []
+    step = 2
+
+
+    q1 = "What are the key concepts and modules in LlamaIndex for composing a Retrieval Augmented Generation (RAG) pipeline?"
+    q2 = "What is the purpose of the `SimpleDirectoryReader` function in the LlamaIndex documentation?"
+
+    print(f"Eval question: {q1}")
+    response1 = query_engine.query(q1)
+    print(response1)
+    print(f"Eval question: {q2}")
+    response2 = query_engine.query(q2)
+    print(response2)
+
+    for batch_size in range(0, len(questions), step):
+        batch_qs = questions[batch_size:batch_size+step]
+        print(f"batch index start: {batch_size},  question: {batch_qs}")
+
+        # tasks = [run_query(query_engine, q) for q in batch_qs]
+
+        # responses = asyncio.run(query_batch_question(query_engine,batch_qs))
+
+        print(f"Eval question: {batch_qs[0]}")
+        response1 = query_engine.query(batch_qs[0])
+        print(response1)
+        response2 = query_engine.query(batch_qs[1])
+        print(response2)
+
+        print(f"finished batch {(batch_size // step) + 1} out of {len(questions) // step}")
+
+
+        # for response in responses:
+        #     eval_result = 1 if "YES" in evaluator.evaluate(response) else 0
+        #     total_correct += eval_result
+        #     all_results.append(eval_result)
+        #     print(f"Eval q res: {eval_result}")
         
         # helps avoid rate limits with OpenAI API
         time.sleep(1)

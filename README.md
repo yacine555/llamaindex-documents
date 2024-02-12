@@ -1,8 +1,8 @@
-# RAG Architecture with Llama-Index to retrieve and query documents
+# Customizable RAG Architecture with LlamaIndex to retrieve and query documents (ALPHA)
 
 ## Description
 
-RAG architecture with web scrapping and Node Postprocessor for document retrieval using the [Llamaindex](https://www.llamaindex.ai/) Data Framework
+Customizable RAG architecture with web scrapping and Node Postprocessor for document retrieval using the [Llamaindex](https://www.llamaindex.ai/) Data Framework
 
 ## Getting Started
 

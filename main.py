@@ -35,7 +35,7 @@ def run_test():
 
     llm = get_llm(1,"gpt-3.5-turbo",0)
     service_context = ServiceContext.from_defaults(llm=llm)
-    set_global_service_context(service_context)
+    # set_global_service_context(service_context)
 
     # load our documents from each folder. we keep them seperate for now, in order to create seperate indexes
     getting_started_docs = load_markdown_docs("llamindex-docs-tutorial/getting_started")
@@ -66,7 +66,7 @@ def run_test():
     # contributing_index = create_vector_index_locally("llamindex-docs-tutorial/development",contributing_docs)
    
 
-    # create a query engine tool for each folder
+    # create a query engine tool for each index
     getting_started_tool = QueryEngineTool.from_defaults(
         query_engine=gs_index.as_query_engine(), 
         name="Getting Started", 
@@ -138,27 +138,37 @@ def run_test():
         verbose=False
     )
 
-
-    print("EVAL QUERY ENGINE:")
-    response = query_engine.query("How do I install llama index?")
+    # print("=================================")
+    # print("EVAL QUERY ENGINE TEST:")
+    # response = query_engine.query("How do I install llama index?")
     # print(str(response))
+    # print("=================================")
 
-    question_dataset = generate_eval_questions("llamindex-docs-tutorial/getting_started")
+    print("=================================")
+    print("GENERATE QUESTIONS")
+    question_dataset = generate_eval_questions("llamindex-docs-tutorial/getting_started/")
+    print("=================================")
 
-    llm = get_llm(1,"gpt-4",0)
-    service_context = ServiceContext.from_defaults(llm=llm)
-    elvaluator = ResponseEvaluator(service_context=service_context)
 
-    # total_correct, all_results = evaluate_query_engine(elvaluator, query_engine, question_dataset)
+    print("=================================")
+    print("EVAL QUESTIONS")
+    # llm = get_llm(1,"gpt-4",0)
+    llm2 = get_llm(1,"gpt-3.5-turbo",0)
+    service_context2 = ServiceContext.from_defaults(llm=llm2)
+    evaluator = ResponseEvaluator(service_context=service_context)
+    all_results = evaluate_query_engine(evaluator, query_engine, question_dataset)
+    print("=================================")
+
+    # total_correct, all_results = evaluate_query_engine(evaluator, query_engine, question_dataset)
     # print(f"Halucination? Scored {total_correct} out of {len(question_dataset)} questions correctly.")
 
-    all_results = evaluate_query_engine(elvaluator, query_engine, question_dataset)
+   
     total_correct = 0
  
-    for r in all_results:
-        print(r)
-        total_correct += r
-    print(f"Halucination? Scored {total_correct} out of {len(all_results)} questions correctly.")
+    # for r in all_results:
+    #     print(r)
+    #     total_correct += 1
+    # print(f"Halucination? Scored {total_correct} out of {len(all_results)} questions correctly.")
 
 
 
